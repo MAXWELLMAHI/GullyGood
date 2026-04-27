@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8f2e9;
+  --foreground: #143b2a;
+  --card: #fffaf4;
+  --card-foreground: #143b2a;
+  --muted: #66796f;
+  --muted-surface: #efe4d3;
+  --border: #dbcbb5;
+  --brand: #1f5b3d;
+  --brand-foreground: #f9f5ee;
+  --accent: #ea8c43;
+  --accent-foreground: #40200c;
+  --success: #2f7652;
+  --danger: #9f3f2b;
+  --ring: rgba(31, 91, 61, 0.28);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-surface: var(--muted-surface);
+  --color-border: var(--border);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+body {
+  background: var(--background);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(31, 91, 61, 0.16);
+}
+
+.glass-panel {
+  background: rgba(255, 250, 244, 0.84);
+  backdrop-filter: blur(18px);
+}
+
+.page-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .page-grid {
+    gap: 1.5rem;
+  }
+}

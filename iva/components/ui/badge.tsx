@@ -1,0 +1,30 @@
+import type { HTMLAttributes } from "react";
+import { cn } from "@/lib/utils";
+
+const variants = {
+  neutral: "bg-muted-surface text-foreground",
+  success: "bg-[#dff0e7] text-success",
+  accent: "bg-[#ffe4d1] text-accent-foreground",
+  warning: "bg-[#f8e0d8] text-danger",
+} as const;
+
+type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
+  variant?: keyof typeof variants;
+};
+
+export function Badge({
+  className,
+  variant = "neutral",
+  ...props
+}: BadgeProps) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]",
+        variants[variant],
+        className,
+      )}
+      {...props}
+    />
+  );
+}
