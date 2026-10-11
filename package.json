@@ -1,0 +1,15 @@
+{
+  "name": "eva-root",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix iva",
+    "build": "npm run build --prefix iva",
+    "start": "npm run start --prefix iva",
+    "lint": "npm run lint --prefix iva",
+    "typecheck": "npm run typecheck --prefix iva"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.105.0"
+  }
+}
