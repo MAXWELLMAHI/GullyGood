@@ -13,8 +13,12 @@ type MobileNavProps = {
 export function MobileNav({ role, hasUser }: MobileNavProps) {
   const pathname = usePathname();
 
+  const isDonate =
+    pathname.startsWith("/donor/donate") ||
+    pathname.includes("donate") ||
+    (typeof window !== "undefined" && window.location.pathname.includes("donate"));
+
   const isHome = pathname === "/" || pathname === "/donor/dashboard";
-  const isDonate = pathname.startsWith("/donor/donate");
   const isNgo = pathname.startsWith("/ngo");
   const isAdmin = pathname.startsWith("/admin");
   const isAuth = pathname.startsWith("/login");

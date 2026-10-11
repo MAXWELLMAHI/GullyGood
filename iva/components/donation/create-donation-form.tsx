@@ -329,7 +329,7 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
 
         {/* STEP 1: CATEGORY SELECTION (Spec §4 redlines 5 & 6) */}
         {step === 1 && (
-          <Card className="p-6 sm:p-8 animate-hero-entrance space-y-6">
+          <Card className="p-6 sm:p-8 space-y-6">
             <div className="space-y-1">
               <span className="text-xs font-bold uppercase tracking-wider text-[#17A34A]">
                 Step 1 of 4
@@ -345,7 +345,7 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
             {/* Solid Color Big Category Tiles */}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {categoryOptions.map((cat) => {
-                const isSelected = category === cat.name;
+                const isSelected = category.toLowerCase() === cat.name.toLowerCase();
                 return (
                   <button
                     key={cat.name}
@@ -354,31 +354,37 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
                       setCategory(cat.name);
                       triggerHappyFeedback();
                     }}
+                    onPointerDown={(e) => {
+                      if (e.pointerType === "touch") {
+                        setCategory(cat.name);
+                        triggerHappyFeedback();
+                      }
+                    }}
                     className={cn(
-                      "relative flex flex-col items-center justify-center rounded-[24px] p-4 sm:p-5 text-center text-white transition-all duration-150 cursor-pointer touch-manipulation select-none border-2 min-h-[140px] sm:min-h-[160px]",
+                      "relative flex flex-col items-center justify-center rounded-[24px] p-4 sm:p-5 text-center text-white transition-all duration-100 cursor-pointer touch-manipulation select-none border-4 min-h-[140px] sm:min-h-[160px]",
                       cat.bg,
                       isSelected
-                        ? "border-white ring-4 ring-black/20 shadow-xl scale-[1.02] z-10"
-                        : "border-transparent opacity-90 hover:opacity-100"
+                        ? "border-white ring-4 ring-[#14251C] shadow-2xl scale-[1.03] z-10"
+                        : "border-transparent opacity-95 active:opacity-80"
                     )}
                   >
                     {isSelected && (
-                      <span className="absolute top-2.5 right-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#14251C] shadow-md">
-                        <Check className="h-3.5 w-3.5 stroke-[3]" />
+                      <span className="absolute top-2.5 right-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#14251C] shadow-lg font-bold">
+                        <Check className="h-4 w-4 stroke-[3]" />
                       </span>
                     )}
-                    <span className="text-4xl sm:text-5xl pointer-events-none">
+                    <span className="text-4xl sm:text-5xl transition-transform duration-100">
                       {cat.emoji}
                     </span>
-                    <span className="mt-2 font-display text-base sm:text-lg font-bold pointer-events-none">
+                    <span className="mt-2 font-display text-base sm:text-lg font-bold">
                       {cat.name}
                     </span>
-                    <span className="mt-0.5 text-[11px] opacity-90 line-clamp-1 font-medium pointer-events-none">
+                    <span className="mt-0.5 text-[11px] opacity-90 line-clamp-1 font-medium">
                       {cat.desc}
                     </span>
                     {isSelected && (
-                      <span className="mt-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white pointer-events-none">
-                        Selected ✨
+                      <span className="mt-1.5 rounded-full bg-black/25 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-xs">
+                        Selected ✓
                       </span>
                     )}
                   </button>
@@ -406,7 +412,7 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
 
         {/* STEP 2: ITEM DETAILS & QUANTITY */}
         {step === 2 && (
-          <Card className="p-6 sm:p-8 animate-hero-entrance space-y-6">
+          <Card className="p-6 sm:p-8 space-y-6">
             <div className="space-y-1">
               <span className="text-xs font-bold uppercase tracking-wider text-[#17A34A]">
                 Step 2 of 4 · {category}
@@ -581,7 +587,7 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
 
         {/* STEP 3: LOCATION & PICKUP WINDOW */}
         {step === 3 && (
-          <Card className="p-6 sm:p-8 animate-hero-entrance space-y-6">
+          <Card className="p-6 sm:p-8 space-y-6">
             <div className="space-y-1">
               <span className="text-xs font-bold uppercase tracking-wider text-[#17A34A]">
                 Step 3 of 4 · Pickup Setup
@@ -789,7 +795,7 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
 
         {/* STEP 4: REVIEW & CELEBRATION SUBMIT */}
         {step === 4 && (
-          <Card className="p-6 sm:p-8 animate-hero-entrance space-y-6">
+          <Card className="p-6 sm:p-8 space-y-6">
             <div className="space-y-1">
               <span className="text-xs font-bold uppercase tracking-wider text-[#17A34A]">
                 Step 4 of 4 · Final Review
@@ -879,7 +885,7 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
         )}
 
         {/* UNIFIED MOBILE BOTTOM BAR (Fixed to Viewport, Safe-Area Padded, Always Accessible) */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#E5E7EB] bg-white/98 px-4 pt-3 pb-[max(0.85rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(20,37,28,0.12)] backdrop-blur-lg sm:hidden">
+        <div className="fixed bottom-0 left-0 right-0 z-[999] border-t border-[#E5E7EB] bg-white/98 px-4 pt-3 pb-[max(0.85rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(20,37,28,0.12)] backdrop-blur-lg sm:hidden">
           <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
             {step === 1 && (
               <>
@@ -901,7 +907,13 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
                     setStep(2);
                     triggerHappyFeedback();
                   }}
-                  className="h-12 px-6 font-display text-sm font-bold shadow-md shadow-[#22C55E]/30 touch-manipulation shrink-0"
+                  onPointerDown={(e) => {
+                    if (e.pointerType === "touch") {
+                      setStep(2);
+                      triggerHappyFeedback();
+                    }
+                  }}
+                  className="h-12 px-6 font-display text-sm font-bold shadow-md shadow-[#22C55E]/30 touch-manipulation shrink-0 cursor-pointer"
                 >
                   <span>Continue →</span>
                 </Button>
@@ -915,7 +927,10 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => setStep(1)}
-                  className="h-11 px-3.5 font-bold touch-manipulation shrink-0"
+                  onPointerDown={(e) => {
+                    if (e.pointerType === "touch") setStep(1);
+                  }}
+                  className="h-11 px-3.5 font-bold touch-manipulation shrink-0 cursor-pointer"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   <span>Back</span>
@@ -932,7 +947,13 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
                     setStep(3);
                     triggerHappyFeedback();
                   }}
-                  className="h-12 px-5 font-display text-sm font-bold shadow-md shadow-[#22C55E]/30 touch-manipulation shrink-0"
+                  onPointerDown={(e) => {
+                    if (e.pointerType === "touch") {
+                      setStep(3);
+                      triggerHappyFeedback();
+                    }
+                  }}
+                  className="h-12 px-5 font-display text-sm font-bold shadow-md shadow-[#22C55E]/30 touch-manipulation shrink-0 cursor-pointer"
                 >
                   <span>Next: Area →</span>
                 </Button>
@@ -946,7 +967,10 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => setStep(2)}
-                  className="h-11 px-3.5 font-bold touch-manipulation shrink-0"
+                  onPointerDown={(e) => {
+                    if (e.pointerType === "touch") setStep(2);
+                  }}
+                  className="h-11 px-3.5 font-bold touch-manipulation shrink-0 cursor-pointer"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   <span>Back</span>
@@ -963,7 +987,13 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
                     setStep(4);
                     triggerHappyFeedback();
                   }}
-                  className="h-12 px-5 font-display text-sm font-bold shadow-md shadow-[#22C55E]/30 touch-manipulation shrink-0"
+                  onPointerDown={(e) => {
+                    if (e.pointerType === "touch") {
+                      setStep(4);
+                      triggerHappyFeedback();
+                    }
+                  }}
+                  className="h-12 px-5 font-display text-sm font-bold shadow-md shadow-[#22C55E]/30 touch-manipulation shrink-0 cursor-pointer"
                 >
                   <span>Review →</span>
                 </Button>
@@ -977,7 +1007,10 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => setStep(3)}
-                  className="h-11 px-3.5 font-bold touch-manipulation shrink-0"
+                  onPointerDown={(e) => {
+                    if (e.pointerType === "touch") setStep(3);
+                  }}
+                  className="h-11 px-3.5 font-bold touch-manipulation shrink-0 cursor-pointer"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   <span>Edit</span>
@@ -987,7 +1020,7 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
                     idleLabel={previewMode ? "Publish (Demo) 🎉" : "Publish to NGOs 🎉"}
                     pendingLabel="Broadcasting..."
                     size="md"
-                    className="w-full h-12 font-display text-sm font-bold shadow-md shadow-[#22C55E]/30 touch-manipulation"
+                    className="w-full h-12 font-display text-sm font-bold shadow-md shadow-[#22C55E]/30 touch-manipulation cursor-pointer"
                   />
                 </div>
               </>
