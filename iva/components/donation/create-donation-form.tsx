@@ -105,14 +105,21 @@ function playHappyChime() {
 }
 
 function triggerHappyFeedback() {
-  playHappyChime();
-  if (typeof window !== "undefined" && window.navigator?.vibrate) {
+  if (typeof window === "undefined") return;
+  setTimeout(() => {
     try {
-      window.navigator.vibrate([15, 30, 20]);
+      playHappyChime();
     } catch {
-      // Ignore
+      // Audio optional
     }
-  }
+    try {
+      if (typeof window !== "undefined" && window.navigator?.vibrate) {
+        window.navigator.vibrate([15, 30, 20]);
+      }
+    } catch {
+      // Vibrate optional
+    }
+  }, 0);
 }
 
 export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
@@ -304,7 +311,7 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
         </div>
       </div>
 
-      <form action={formAction}>
+      <form action={formAction} className="pb-28 sm:pb-0">
         {/* Hidden inputs to pass data to Server Action */}
         <input name="category" type="hidden" value={category} />
         <input name="quantity" type="hidden" value={quantity} />
@@ -344,33 +351,33 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
                     key={cat.name}
                     type="button"
                     onClick={() => {
-                      triggerHappyFeedback();
                       setCategory(cat.name);
+                      triggerHappyFeedback();
                     }}
                     className={cn(
-                      "relative flex flex-col items-center justify-center rounded-[24px] p-5 text-center text-white transition-all duration-150 active:scale-95 cursor-pointer touch-manipulation select-none border-2",
+                      "relative flex flex-col items-center justify-center rounded-[24px] p-4 sm:p-5 text-center text-white transition-all duration-150 cursor-pointer touch-manipulation select-none border-2 min-h-[140px] sm:min-h-[160px]",
                       cat.bg,
                       isSelected
-                        ? "border-white ring-4 ring-black/10 scale-[1.03] shadow-xl z-10"
-                        : "border-transparent opacity-90 hover:opacity-100 hover:scale-[1.01]"
+                        ? "border-white ring-4 ring-black/20 shadow-xl scale-[1.02] z-10"
+                        : "border-transparent opacity-90 hover:opacity-100"
                     )}
                   >
                     {isSelected && (
-                      <span className="absolute top-2.5 right-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#14251C] shadow-md animate-bounce">
+                      <span className="absolute top-2.5 right-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#14251C] shadow-md">
                         <Check className="h-3.5 w-3.5 stroke-[3]" />
                       </span>
                     )}
-                    <span className="text-4xl sm:text-5xl pointer-events-none transition-transform duration-150 active:scale-125">
+                    <span className="text-4xl sm:text-5xl pointer-events-none">
                       {cat.emoji}
                     </span>
-                    <span className="mt-2.5 font-display text-base sm:text-lg font-bold pointer-events-none">
+                    <span className="mt-2 font-display text-base sm:text-lg font-bold pointer-events-none">
                       {cat.name}
                     </span>
                     <span className="mt-0.5 text-[11px] opacity-90 line-clamp-1 font-medium pointer-events-none">
                       {cat.desc}
                     </span>
                     {isSelected && (
-                      <span className="mt-1.5 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white pointer-events-none">
+                      <span className="mt-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white pointer-events-none">
                         Selected ✨
                       </span>
                     )}
@@ -379,47 +386,20 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
               })}
             </div>
 
-            <div className="flex justify-end pt-4">
+            {/* Desktop Continue Button */}
+            <div className="hidden sm:flex justify-end pt-4">
               <Button
                 size="lg"
                 type="button"
                 onClick={() => {
-                  triggerHappyFeedback();
                   setStep(2);
+                  triggerHappyFeedback();
                 }}
-                className="w-full sm:w-auto font-display touch-manipulation active:scale-95 shadow-md shadow-[#22C55E]/20"
+                className="w-auto font-display touch-manipulation shadow-md shadow-[#22C55E]/20"
               >
                 <span>Continue to details ({category})</span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
-            </div>
-
-            {/* Sticky Mobile Floating Action Bar for Step 1 */}
-            <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#E5E7EB] bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(20,37,28,0.12)] backdrop-blur-md sm:hidden">
-              <div className="flex items-center justify-between gap-3 max-w-lg mx-auto">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-2xl">{selectedCategoryObj.emoji}</span>
-                  <div>
-                    <p className="font-display text-sm font-bold text-[#14251C]">
-                      {category}
-                    </p>
-                    <p className="text-[10px] text-[#22C55E] font-bold">
-                      Ready to give 🎁
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  size="md"
-                  type="button"
-                  onClick={() => {
-                    triggerHappyFeedback();
-                    setStep(2);
-                  }}
-                  className="font-display shadow-md shadow-[#22C55E]/30 touch-manipulation active:scale-95 px-5"
-                >
-                  <span>Continue →</span>
-                </Button>
-              </div>
             </div>
           </Card>
         )}
@@ -444,42 +424,44 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
               <label className="font-display text-sm font-bold text-[#14251C]">
                 Quantity ({category})
               </label>
-              <div className="flex items-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerHappyFeedback();
-                    setQuantity(Math.max(1, quantity - 1));
-                  }}
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white text-lg font-bold text-[#14251C] shadow-xs transition hover:bg-[#F1FCF5] active:scale-90 touch-manipulation cursor-pointer"
-                >
-                  <Minus className="h-5 w-5 pointer-events-none" />
-                </button>
-                <div className="flex h-12 min-w-24 items-center justify-center rounded-2xl bg-white px-4 border border-[#E5E7EB] shadow-xs font-display text-2xl font-bold text-[#14251C]">
-                  {quantity}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuantity((prev) => Math.max(1, prev - 1));
+                      triggerHappyFeedback();
+                    }}
+                    className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white text-lg font-bold text-[#14251C] shadow-xs transition hover:bg-[#F1FCF5] touch-manipulation cursor-pointer"
+                  >
+                    <Minus className="h-5 w-5 pointer-events-none" />
+                  </button>
+                  <div className="flex h-12 min-w-20 items-center justify-center rounded-2xl bg-white px-4 border border-[#E5E7EB] shadow-xs font-display text-2xl font-bold text-[#14251C]">
+                    {quantity}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuantity((prev) => prev + 1);
+                      triggerHappyFeedback();
+                    }}
+                    className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#22C55E] text-lg font-bold text-white shadow-xs transition hover:bg-[#17A34A] touch-manipulation cursor-pointer"
+                  >
+                    <Plus className="h-5 w-5 pointer-events-none" />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerHappyFeedback();
-                    setQuantity(quantity + 1);
-                  }}
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#22C55E] text-lg font-bold text-white shadow-xs transition hover:bg-[#17A34A] active:scale-90 touch-manipulation cursor-pointer"
-                >
-                  <Plus className="h-5 w-5 pointer-events-none" />
-                </button>
                 {/* Quick presets */}
-                <div className="hidden sm:flex items-center gap-1.5 ml-2">
+                <div className="flex flex-wrap items-center gap-1.5 pt-1 sm:pt-0 sm:ml-2">
                   {[1, 5, 10, 20, 50].map((num) => (
                     <button
                       key={num}
                       type="button"
                       onClick={() => {
-                        triggerHappyFeedback();
                         setQuantity(num);
+                        triggerHappyFeedback();
                       }}
                       className={cn(
-                        "rounded-full px-3 py-1 text-xs font-bold transition touch-manipulation cursor-pointer",
+                        "min-h-[36px] min-w-[36px] rounded-full px-3.5 py-1 text-xs font-bold transition touch-manipulation cursor-pointer",
                         quantity === num ? "bg-[#14251C] text-white" : "bg-white border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F1FCF5]"
                       )}
                     >
@@ -501,14 +483,14 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
                     key={q.value}
                     type="button"
                     onClick={() => {
-                      triggerHappyFeedback();
                       setQuality(q.value);
+                      triggerHappyFeedback();
                     }}
                     className={cn(
-                      "flex flex-col items-start rounded-2xl border p-3.5 text-left transition-all touch-manipulation select-none cursor-pointer",
+                      "flex flex-col items-start rounded-2xl border p-3.5 text-left transition-all touch-manipulation select-none cursor-pointer min-h-[64px]",
                       quality === q.value
                         ? "border-[#22C55E] bg-[#F1FCF5] ring-2 ring-[#22C55E]/40 scale-[1.02]"
-                        : "border-[#E5E7EB] bg-white hover:bg-[#FCFCFA] active:scale-98"
+                        : "border-[#E5E7EB] bg-white hover:bg-[#FCFCFA]"
                     )}
                   >
                     <span className="font-display text-sm font-bold text-[#14251C] pointer-events-none">
@@ -569,7 +551,8 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
               />
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-[#E5E7EB]">
+            {/* Desktop Navigation */}
+            <div className="hidden sm:flex items-center justify-between pt-4 border-t border-[#E5E7EB]">
               <Button
                 type="button"
                 variant="outline"
@@ -584,46 +567,14 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
                 type="button"
                 size="lg"
                 onClick={() => {
-                  triggerHappyFeedback();
                   setStep(3);
+                  triggerHappyFeedback();
                 }}
-                className="font-display touch-manipulation active:scale-95 shadow-md shadow-[#22C55E]/20"
+                className="font-display touch-manipulation shadow-md shadow-[#22C55E]/20"
               >
                 <span>Pickup window & area</span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
-            </div>
-
-            {/* Sticky Mobile Floating Action Bar for Step 2 */}
-            <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#E5E7EB] bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(20,37,28,0.12)] backdrop-blur-md sm:hidden">
-              <div className="flex items-center justify-between gap-3 max-w-lg mx-auto">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setStep(1)}
-                  className="touch-manipulation"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  <span>Back</span>
-                </Button>
-                <div className="text-center">
-                  <p className="font-display text-xs font-bold text-[#14251C]">
-                    {quantity} items · {quality}
-                  </p>
-                </div>
-                <Button
-                  size="md"
-                  type="button"
-                  onClick={() => {
-                    triggerHappyFeedback();
-                    setStep(3);
-                  }}
-                  className="font-display shadow-md shadow-[#22C55E]/30 touch-manipulation active:scale-95 px-4"
-                >
-                  <span>Next: Area →</span>
-                </Button>
-              </div>
             </div>
           </Card>
         )}
@@ -808,11 +759,13 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-[#E5E7EB]">
+            {/* Desktop Navigation for Step 3 */}
+            <div className="hidden sm:flex items-center justify-between pt-4 border-t border-[#E5E7EB]">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setStep(2)}
+                className="touch-manipulation"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span>Back</span>
@@ -821,8 +774,11 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
               <Button
                 type="button"
                 size="lg"
-                onClick={() => setStep(4)}
-                className="font-display"
+                onClick={() => {
+                  setStep(4);
+                  triggerHappyFeedback();
+                }}
+                className="font-display touch-manipulation shadow-md shadow-[#22C55E]/20"
               >
                 <span>Review & confirm</span>
                 <ArrowRight className="h-4 w-4" />
@@ -891,11 +847,13 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
               </p>
             ) : null}
 
-            <div className="flex items-center justify-between pt-4 border-t border-[#E5E7EB]">
+            {/* Desktop Navigation for Step 4 */}
+            <div className="hidden sm:flex items-center justify-between pt-4 border-t border-[#E5E7EB]">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setStep(3)}
+                className="touch-manipulation"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span>Edit details</span>
@@ -906,19 +864,136 @@ export function CreateDonationForm({ previewMode }: CreateDonationFormProps) {
                   idleLabel="Publish live donation (Demo)"
                   pendingLabel="Publishing..."
                   size="lg"
-                  className="font-display"
+                  className="font-display touch-manipulation shadow-md shadow-[#22C55E]/30"
                 />
               ) : (
                 <SubmitButton
                   idleLabel="Publish donation to verified NGOs 🎉"
                   pendingLabel="Broadcasting to NGOs..."
                   size="lg"
-                  className="font-display animate-celebrate"
+                  className="font-display animate-celebrate touch-manipulation shadow-md shadow-[#22C55E]/30"
                 />
               )}
             </div>
           </Card>
         )}
+
+        {/* UNIFIED MOBILE BOTTOM BAR (Fixed to Viewport, Safe-Area Padded, Always Accessible) */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#E5E7EB] bg-white/98 px-4 pt-3 pb-[max(0.85rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(20,37,28,0.12)] backdrop-blur-lg sm:hidden">
+          <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
+            {step === 1 && (
+              <>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="text-2xl">{selectedCategoryObj.emoji}</span>
+                  <div className="truncate">
+                    <p className="font-display text-sm font-bold text-[#14251C] truncate">
+                      {category}
+                    </p>
+                    <p className="text-[10px] font-bold text-[#17A34A]">
+                      Ready to give 🎁
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="md"
+                  type="button"
+                  onClick={() => {
+                    setStep(2);
+                    triggerHappyFeedback();
+                  }}
+                  className="h-12 px-6 font-display text-sm font-bold shadow-md shadow-[#22C55E]/30 touch-manipulation shrink-0"
+                >
+                  <span>Continue →</span>
+                </Button>
+              </>
+            )}
+
+            {step === 2 && (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setStep(1)}
+                  className="h-11 px-3.5 font-bold touch-manipulation shrink-0"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back</span>
+                </Button>
+                <div className="text-center truncate px-1">
+                  <p className="font-display text-xs font-bold text-[#14251C] truncate">
+                    {quantity} items · {quality}
+                  </p>
+                </div>
+                <Button
+                  size="md"
+                  type="button"
+                  onClick={() => {
+                    setStep(3);
+                    triggerHappyFeedback();
+                  }}
+                  className="h-12 px-5 font-display text-sm font-bold shadow-md shadow-[#22C55E]/30 touch-manipulation shrink-0"
+                >
+                  <span>Next: Area →</span>
+                </Button>
+              </>
+            )}
+
+            {step === 3 && (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setStep(2)}
+                  className="h-11 px-3.5 font-bold touch-manipulation shrink-0"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back</span>
+                </Button>
+                <div className="text-center truncate px-1">
+                  <p className="font-display text-xs font-bold text-[#14251C] truncate">
+                    📍 {locality}
+                  </p>
+                </div>
+                <Button
+                  size="md"
+                  type="button"
+                  onClick={() => {
+                    setStep(4);
+                    triggerHappyFeedback();
+                  }}
+                  className="h-12 px-5 font-display text-sm font-bold shadow-md shadow-[#22C55E]/30 touch-manipulation shrink-0"
+                >
+                  <span>Review →</span>
+                </Button>
+              </>
+            )}
+
+            {step === 4 && (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setStep(3)}
+                  className="h-11 px-3.5 font-bold touch-manipulation shrink-0"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Edit</span>
+                </Button>
+                <div className="flex-1">
+                  <SubmitButton
+                    idleLabel={previewMode ? "Publish (Demo) 🎉" : "Publish to NGOs 🎉"}
+                    pendingLabel="Broadcasting..."
+                    size="md"
+                    className="w-full h-12 font-display text-sm font-bold shadow-md shadow-[#22C55E]/30 touch-manipulation"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </form>
     </div>
   );

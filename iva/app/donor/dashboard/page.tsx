@@ -136,12 +136,12 @@ export default async function DonorDashboardPage() {
               <Link
                 key={cat.name}
                 href={`/donor/donate?category=${encodeURIComponent(cat.name)}`}
-                className="group flex flex-col items-center justify-center rounded-2xl border border-[#E5E7EB] bg-[#FCFCFA] p-2.5 text-center transition-all duration-150 hover:-translate-y-0.5 hover:border-[#22C55E] hover:bg-white hover:shadow-sm active:scale-95"
+                className="group flex flex-col items-center justify-center rounded-2xl border border-[#E5E7EB] bg-[#FCFCFA] p-2.5 text-center transition-all duration-150 hover:-translate-y-0.5 hover:border-[#22C55E] hover:bg-white hover:shadow-sm active:scale-95 touch-manipulation min-h-[58px]"
               >
-                <span className="text-xl transition-transform duration-200 group-hover:scale-115">
+                <span className="text-xl transition-transform duration-200 group-hover:scale-110 pointer-events-none">
                   {cat.emoji}
                 </span>
-                <span className="mt-1 font-display text-[11px] font-bold text-[#14251C] truncate w-full">
+                <span className="mt-1 font-display text-[11px] font-bold text-[#14251C] truncate w-full pointer-events-none">
                   {cat.name}
                 </span>
               </Link>

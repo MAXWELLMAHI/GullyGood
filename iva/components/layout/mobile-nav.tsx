@@ -24,8 +24,8 @@ export function MobileNav({ role, hasUser }: MobileNavProps) {
   }
 
   return (
-    <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 w-[min(94vw,420px)] lg:hidden">
-      <nav className="flex items-center justify-between rounded-full border border-white/60 bg-white/92 px-3 py-2 shadow-[0_16px_40px_rgba(20,37,28,0.16)] backdrop-blur-xl">
+    <div className="pointer-events-none fixed bottom-4 left-1/2 z-50 -translate-x-1/2 w-[min(94vw,420px)] lg:hidden">
+      <nav className="pointer-events-auto flex items-center justify-between rounded-full border border-white/60 bg-white/92 px-3 py-2 shadow-[0_16px_40px_rgba(20,37,28,0.16)] backdrop-blur-xl">
         {/* Home */}
         <Link
           href={role === "ngo" ? "/ngo/dashboard" : role === "admin" ? "/admin/dashboard" : "/"}
