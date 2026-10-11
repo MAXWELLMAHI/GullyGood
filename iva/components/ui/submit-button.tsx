@@ -8,7 +8,7 @@ type SubmitButtonProps = {
   pendingLabel?: string;
   className?: string;
   disabled?: boolean;
-  variant?: "primary" | "secondary" | "outline" | "ghost";
+  variant?: "primary" | "secondary" | "dark" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
 };
 
@@ -34,3 +34,4 @@ export function SubmitButton({
     </Button>
   );
 }
+

@@ -1,39 +1,62 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Fredoka, Manrope } from "next/font/google";
 import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { MobileNav } from "@/components/layout/mobile-nav";
+import { getAuthContext } from "@/lib/auth";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fredoka = Fredoka({
+  variable: "--font-fredoka",
   subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "IVA | Hyperlocal Donation Loop",
+  title: "GullyGood — Hyperlocal Essentials Loop",
   description:
-    "Mumbai-first donation workflow connecting donors, verified NGOs, and admins on a secure Supabase backbone.",
+    "Give something in ~90 seconds. Moving essentials directly to verified nearby NGOs in Mumbai without coordination drag.",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/gullygood-icon.png",
+  },
 };
 
-export default function RootLayout({
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#14251C",
+};
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const auth = await getAuthContext();
+
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="min-h-screen bg-background text-foreground">
-        <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(234,140,67,0.16),_transparent_32%),linear-gradient(180deg,_rgba(20,74,52,0.06),_transparent_25%),var(--background)]">
+    <html lang="en" className={`${fredoka.variable} ${manrope.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen bg-[var(--paper)] text-[var(--text)] font-sans antialiased" suppressHydrationWarning>
+        <div className="flex min-h-screen flex-col">
           <SiteHeader />
-          <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 pb-12 pt-6 sm:px-6 lg:px-8">
+          <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-32 pt-4 sm:px-6 lg:px-8 lg:pb-14">
             {children}
           </main>
+          <SiteFooter />
+          <MobileNav hasUser={Boolean(auth.user)} role={auth.role} />
         </div>
       </body>
     </html>
   );
 }
+

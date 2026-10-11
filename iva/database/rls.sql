@@ -11,6 +11,7 @@ alter table public.pickup_tasks enable row level security;
 alter table public.feedback enable row level security;
 alter table public.audit_logs enable row level security;
 alter table public.notifications enable row level security;
+alter table public.chat_messages enable row level security;
 
 drop policy if exists profiles_select_self_or_admin on public.profiles;
 create policy profiles_select_self_or_admin
@@ -95,14 +96,7 @@ to authenticated
 using (
   public.is_admin()
   or donor_id = auth.uid()
-  or exists (
-    select 1
-    from public.claims c
-    join public.ngo_staff ns on ns.ngo_id = c.ngo_id
-    where c.listing_id = donation_listings.id
-      and ns.user_id = auth.uid()
-      and c.state in ('locked'::public.claim_status, 'completed'::public.claim_status)
-  )
+  or public.is_current_user_claim_participant_for_listing(id)
 );
 
 drop policy if exists donation_listings_insert_owner_only on public.donation_listings;
@@ -120,8 +114,25 @@ create policy donation_listings_update_owner_or_admin
 on public.donation_listings
 for update
 to authenticated
-using (public.is_admin() or donor_id = auth.uid())
-with check (public.is_admin() or donor_id = auth.uid());
+using (
+  public.is_admin()
+  or (
+    donor_id = auth.uid()
+    and status in ('submitted'::public.donation_status, 'live'::public.donation_status)
+  )
+)
+with check (
+  public.is_admin()
+  or (
+    donor_id = auth.uid()
+    and status in (
+      'submitted'::public.donation_status,
+      'live'::public.donation_status,
+      'cancelled'::public.donation_status,
+      'expired'::public.donation_status
+    )
+  )
+);
 
 drop policy if exists donation_images_select_accessible_listing on public.donation_images;
 create policy donation_images_select_accessible_listing
@@ -142,6 +153,7 @@ with check (
     from public.donation_listings d
     where d.id = donation_images.listing_id
       and d.donor_id = auth.uid()
+      and d.status in ('submitted'::public.donation_status, 'live'::public.donation_status)
   )
 );
 
@@ -157,6 +169,7 @@ using (
     from public.donation_listings d
     where d.id = donation_images.listing_id
       and d.donor_id = auth.uid()
+      and d.status in ('submitted'::public.donation_status, 'live'::public.donation_status)
   )
 )
 with check (
@@ -166,7 +179,8 @@ with check (
     from public.donation_listings d
     where d.id = donation_images.listing_id
       and d.donor_id = auth.uid()
-  )
+      and d.status in ('submitted'::public.donation_status, 'live'::public.donation_status)
+    )
 );
 
 drop policy if exists claims_select_participants_or_admin on public.claims;
@@ -176,19 +190,7 @@ for select
 to authenticated
 using (
   public.is_admin()
-  or locked_by_user_id = auth.uid()
-  or exists (
-    select 1
-    from public.ngo_staff ns
-    where ns.ngo_id = claims.ngo_id
-      and ns.user_id = auth.uid()
-  )
-  or exists (
-    select 1
-    from public.donation_listings d
-    where d.id = claims.listing_id
-      and d.donor_id = auth.uid()
-  )
+  or public.can_current_user_access_claim(id)
 );
 
 drop policy if exists claims_admin_update on public.claims;
@@ -206,19 +208,8 @@ for select
 to authenticated
 using (
   public.is_admin()
-  or exists (
-    select 1
-    from public.donation_listings d
-    where d.id = pickup_tasks.listing_id
-      and d.donor_id = auth.uid()
-  )
-  or exists (
-    select 1
-    from public.claims c
-    join public.ngo_staff ns on ns.ngo_id = c.ngo_id
-    where c.id = pickup_tasks.claim_id
-      and ns.user_id = auth.uid()
-  )
+  or public.is_current_user_listing_owner(listing_id)
+  or public.can_current_user_access_claim(claim_id)
 );
 
 drop policy if exists feedback_select_participants_or_admin on public.feedback;
@@ -229,19 +220,8 @@ to authenticated
 using (
   public.is_admin()
   or author_id = auth.uid()
-  or exists (
-    select 1
-    from public.donation_listings d
-    where d.id = feedback.listing_id
-      and d.donor_id = auth.uid()
-  )
-  or exists (
-    select 1
-    from public.claims c
-    join public.ngo_staff ns on ns.ngo_id = c.ngo_id
-    where c.id = feedback.claim_id
-      and ns.user_id = auth.uid()
-  )
+  or public.is_current_user_listing_owner(listing_id)
+  or (claim_id is not null and public.can_current_user_access_claim(claim_id))
 );
 
 drop policy if exists feedback_insert_participants_only on public.feedback;
@@ -251,22 +231,7 @@ for insert
 to authenticated
 with check (
   author_id = auth.uid()
-  and exists (
-    select 1
-    from public.donation_listings d
-    left join public.claims c on c.id = feedback.claim_id or c.listing_id = feedback.listing_id
-    where d.id = feedback.listing_id
-      and d.status = 'picked_up'::public.donation_status
-      and (
-        d.donor_id = auth.uid()
-        or exists (
-          select 1
-          from public.ngo_staff ns
-          where ns.ngo_id = c.ngo_id
-            and ns.user_id = auth.uid()
-        )
-      )
-  )
+  and public.can_current_user_submit_feedback(listing_id, claim_id)
 );
 
 drop policy if exists feedback_update_author_only on public.feedback;
@@ -306,6 +271,32 @@ to authenticated
 using (user_id = auth.uid() or public.is_admin())
 with check (user_id = auth.uid() or public.is_admin());
 
+drop policy if exists chat_messages_select_participants_or_admin on public.chat_messages;
+create policy chat_messages_select_participants_or_admin
+on public.chat_messages
+for select
+to authenticated
+using (public.can_current_user_chat_on_listing(listing_id));
+
+drop policy if exists chat_messages_insert_participants_only on public.chat_messages;
+create policy chat_messages_insert_participants_only
+on public.chat_messages
+for insert
+to authenticated
+with check (
+  sender_id = auth.uid()
+  and sender_role = public.current_app_role()
+  and sender_role in ('donor'::public.app_role, 'ngo'::public.app_role)
+  and public.can_current_user_chat_on_listing(listing_id)
+  and exists (
+    select 1
+    from public.claims c
+    where c.id = chat_messages.claim_id
+      and c.listing_id = chat_messages.listing_id
+      and c.state in ('locked'::public.claim_status, 'completed'::public.claim_status)
+  )
+);
+
 drop policy if exists storage_donation_images_select on storage.objects;
 create policy storage_donation_images_select
 on storage.objects
@@ -330,6 +321,7 @@ with check (
       from public.donation_listings d
       where d.id = split_part(name, '/', 1)::uuid
         and d.donor_id = auth.uid()
+        and d.status in ('submitted'::public.donation_status, 'live'::public.donation_status)
     )
   )
 );
@@ -348,6 +340,7 @@ using (
       from public.donation_listings d
       where d.id = split_part(name, '/', 1)::uuid
         and d.donor_id = auth.uid()
+        and d.status in ('submitted'::public.donation_status, 'live'::public.donation_status)
     )
   )
 )
@@ -360,6 +353,7 @@ with check (
       from public.donation_listings d
       where d.id = split_part(name, '/', 1)::uuid
         and d.donor_id = auth.uid()
+        and d.status in ('submitted'::public.donation_status, 'live'::public.donation_status)
     )
   )
 );
@@ -378,6 +372,7 @@ using (
       from public.donation_listings d
       where d.id = split_part(name, '/', 1)::uuid
         and d.donor_id = auth.uid()
+        and d.status in ('submitted'::public.donation_status, 'live'::public.donation_status)
     )
   )
 );
@@ -386,3 +381,7 @@ grant execute on function public.nearby_live_listings(double precision, text) to
 grant execute on function public.listing_detail_for_current_user(uuid) to authenticated;
 grant execute on function public.lock_listing(uuid) to authenticated;
 grant execute on function public.complete_locked_claim(uuid) to authenticated;
+grant execute on function public.send_chat_message(uuid, text, boolean) to authenticated;
+grant execute on function public.sync_profile_from_auth_user(uuid) to authenticated;
+grant execute on function public.log_audit_event(text, text, uuid, jsonb) to authenticated;
+grant execute on function public.queue_notification(uuid, text, text, text, text, text, jsonb, timestamptz) to authenticated;

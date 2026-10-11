@@ -21,6 +21,15 @@ export type FeedbackEntry = {
   targetRole: AppRole;
 };
 
+export type ChatEntry = {
+  id: string;
+  senderRole: Extract<AppRole, "donor" | "ngo">;
+  senderName: string;
+  message: string;
+  sharedPhone: string | null;
+  createdAt: string;
+};
+
 export type ListingSummary = {
   id: string;
   category: string;
@@ -38,6 +47,9 @@ export type ListingSummary = {
   pickupWindowEnd: string;
   imageUrl: string | null;
   distanceKm?: number | null;
+  matchScore?: number | null;
+  ngoRatingAverage?: number | null;
+  ngoCompletionRate?: number | null;
   claimId?: string | null;
   claimState?: ClaimStatus | null;
   ngoName?: string | null;
@@ -47,6 +59,10 @@ export type ListingDetail = ListingSummary & {
   latitude: number;
   longitude: number;
   feedback: FeedbackEntry[];
+  chatEnabled: boolean;
+  chatParticipantName: string | null;
+  chatParticipantPhone: string | null;
+  chatMessages: ChatEntry[];
   canLock: boolean;
   canMarkPickedUp: boolean;
   canLeaveFeedback: boolean;
@@ -74,6 +90,10 @@ export type NgoDirectoryEntry = {
   registrationNumber: string | null;
   contactPhone: string | null;
   serviceRadiusKm: number;
+  acceptedCategories: string[];
+  dailyPickupCapacity: number;
+  ratingAverage: number | null;
+  completionRate: number | null;
   verifiedStatus: NgoVerificationStatus;
 };
 

@@ -2,10 +2,13 @@ import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 const variants = {
-  neutral: "bg-muted-surface text-foreground",
-  success: "bg-[#dff0e7] text-success",
-  accent: "bg-[#ffe4d1] text-accent-foreground",
-  warning: "bg-[#f8e0d8] text-danger",
+  neutral: "bg-[#F3F4F6] text-[#4B5563]",
+  success: "bg-[#F1FCF5] text-[#17A34A] border border-[#22C55E]/20",
+  accent: "bg-[#FFFBEB] text-[#8A6300] border border-[#FFC800]/30",
+  warning: "bg-[#FEF2F2] text-[#FF4B4B] border border-[#FF4B4B]/20",
+  sky: "bg-[#F0F9FF] text-[#0284C7] border border-[#1CB0F6]/25",
+  purple: "bg-[#F5F3FF] text-[#7C6EF2] border border-[#7C6EF2]/25",
+  ink: "bg-[#14251C] text-white",
 } as const;
 
 type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
@@ -20,7 +23,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]",
+        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider",
         variants[variant],
         className,
       )}
@@ -28,3 +31,4 @@ export function Badge({
     />
   );
 }
+

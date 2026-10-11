@@ -13,7 +13,25 @@ declare
   completed_listing_id uuid := '66666666-6666-6666-6666-666666666666';
   locked_claim_id uuid := '77777777-7777-7777-7777-777777777777';
   completed_claim_id uuid := '88888888-8888-8888-8888-888888888888';
+  locked_chat_message_1_id uuid := '99999999-9999-9999-9999-999999999991';
+  locked_chat_message_2_id uuid := '99999999-9999-9999-9999-999999999992';
+  completed_chat_message_1_id uuid := '99999999-9999-9999-9999-999999999993';
+  identities_id_is_uuid boolean := false;
+  identities_has_provider_id boolean := false;
 begin
+  donor_user_id := coalesce(
+    (select id from auth.users where email = 'donor@iva.app' limit 1),
+    donor_user_id
+  );
+  ngo_user_id := coalesce(
+    (select id from auth.users where email = 'ngo@iva.app' limit 1),
+    ngo_user_id
+  );
+  admin_user_id := coalesce(
+    (select id from auth.users where email = 'admin@iva.app' limit 1),
+    admin_user_id
+  );
+
   insert into auth.users (
     id,
     instance_id,
@@ -85,47 +103,312 @@ begin
     )
   on conflict (id) do nothing;
 
-  insert into auth.identities (
-    id,
-    user_id,
-    identity_data,
-    provider,
-    created_at,
-    updated_at,
-    last_sign_in_at
+  select exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'auth'
+      and table_name = 'identities'
+      and column_name = 'provider_id'
   )
-  values
-    (
-      donor_user_id::text,
-      donor_user_id,
-      format('{"sub":"%s","email":"%s"}', donor_user_id, 'donor@iva.app')::jsonb,
-      'email',
-      timezone('utc', now()),
-      timezone('utc', now()),
-      timezone('utc', now())
-    ),
-    (
-      ngo_user_id::text,
-      ngo_user_id,
-      format('{"sub":"%s","email":"%s"}', ngo_user_id, 'ngo@iva.app')::jsonb,
-      'email',
-      timezone('utc', now()),
-      timezone('utc', now()),
-      timezone('utc', now())
-    ),
-    (
-      admin_user_id::text,
-      admin_user_id,
-      format('{"sub":"%s","email":"%s"}', admin_user_id, 'admin@iva.app')::jsonb,
-      'email',
-      timezone('utc', now()),
-      timezone('utc', now()),
-      timezone('utc', now())
-    )
-  on conflict (provider, id) do nothing;
+  into identities_has_provider_id;
+
+  select coalesce(data_type = 'uuid', false)
+  into identities_id_is_uuid
+  from information_schema.columns
+  where table_schema = 'auth'
+    and table_name = 'identities'
+    and column_name = 'id';
+
+  if identities_has_provider_id then
+    if identities_id_is_uuid then
+      insert into auth.identities (
+        id,
+        user_id,
+        identity_data,
+        provider,
+        provider_id,
+        created_at,
+        updated_at,
+        last_sign_in_at
+      )
+      select
+        seeded.id,
+        seeded.user_id,
+        seeded.identity_data,
+        seeded.provider,
+        seeded.provider_id,
+        seeded.created_at,
+        seeded.updated_at,
+        seeded.last_sign_in_at
+      from (
+        values
+          (
+            donor_user_id,
+            donor_user_id,
+            jsonb_build_object('sub', donor_user_id::text, 'email', 'donor@iva.app', 'email_verified', true),
+            'email',
+            donor_user_id::text,
+            timezone('utc', now()),
+            timezone('utc', now()),
+            timezone('utc', now())
+          ),
+          (
+            ngo_user_id,
+            ngo_user_id,
+            jsonb_build_object('sub', ngo_user_id::text, 'email', 'ngo@iva.app', 'email_verified', true),
+            'email',
+            ngo_user_id::text,
+            timezone('utc', now()),
+            timezone('utc', now()),
+            timezone('utc', now())
+          ),
+          (
+            admin_user_id,
+            admin_user_id,
+            jsonb_build_object('sub', admin_user_id::text, 'email', 'admin@iva.app', 'email_verified', true),
+            'email',
+            admin_user_id::text,
+            timezone('utc', now()),
+            timezone('utc', now()),
+            timezone('utc', now())
+          )
+      ) as seeded(
+        id,
+        user_id,
+        identity_data,
+        provider,
+        provider_id,
+        created_at,
+        updated_at,
+        last_sign_in_at
+      )
+      where not exists (
+        select 1
+        from auth.identities existing
+        where existing.user_id = seeded.user_id
+          and existing.provider = seeded.provider
+      );
+    else
+      insert into auth.identities (
+        id,
+        user_id,
+        identity_data,
+        provider,
+        provider_id,
+        created_at,
+        updated_at,
+        last_sign_in_at
+      )
+      select
+        seeded.id::text,
+        seeded.user_id,
+        seeded.identity_data,
+        seeded.provider,
+        seeded.provider_id,
+        seeded.created_at,
+        seeded.updated_at,
+        seeded.last_sign_in_at
+      from (
+        values
+          (
+            donor_user_id,
+            donor_user_id,
+            jsonb_build_object('sub', donor_user_id::text, 'email', 'donor@iva.app', 'email_verified', true),
+            'email',
+            donor_user_id::text,
+            timezone('utc', now()),
+            timezone('utc', now()),
+            timezone('utc', now())
+          ),
+          (
+            ngo_user_id,
+            ngo_user_id,
+            jsonb_build_object('sub', ngo_user_id::text, 'email', 'ngo@iva.app', 'email_verified', true),
+            'email',
+            ngo_user_id::text,
+            timezone('utc', now()),
+            timezone('utc', now()),
+            timezone('utc', now())
+          ),
+          (
+            admin_user_id,
+            admin_user_id,
+            jsonb_build_object('sub', admin_user_id::text, 'email', 'admin@iva.app', 'email_verified', true),
+            'email',
+            admin_user_id::text,
+            timezone('utc', now()),
+            timezone('utc', now()),
+            timezone('utc', now())
+          )
+      ) as seeded(
+        id,
+        user_id,
+        identity_data,
+        provider,
+        provider_id,
+        created_at,
+        updated_at,
+        last_sign_in_at
+      )
+      where not exists (
+        select 1
+        from auth.identities existing
+        where existing.user_id = seeded.user_id
+          and existing.provider = seeded.provider
+      );
+    end if;
+  else
+    if identities_id_is_uuid then
+      insert into auth.identities (
+        id,
+        user_id,
+        identity_data,
+        provider,
+        created_at,
+        updated_at,
+        last_sign_in_at
+      )
+      select
+        seeded.id,
+        seeded.user_id,
+        seeded.identity_data,
+        seeded.provider,
+        seeded.created_at,
+        seeded.updated_at,
+        seeded.last_sign_in_at
+      from (
+        values
+          (
+            donor_user_id,
+            donor_user_id,
+            jsonb_build_object('sub', donor_user_id::text, 'email', 'donor@iva.app', 'email_verified', true),
+            'email',
+            timezone('utc', now()),
+            timezone('utc', now()),
+            timezone('utc', now())
+          ),
+          (
+            ngo_user_id,
+            ngo_user_id,
+            jsonb_build_object('sub', ngo_user_id::text, 'email', 'ngo@iva.app', 'email_verified', true),
+            'email',
+            timezone('utc', now()),
+            timezone('utc', now()),
+            timezone('utc', now())
+          ),
+          (
+            admin_user_id,
+            admin_user_id,
+            jsonb_build_object('sub', admin_user_id::text, 'email', 'admin@iva.app', 'email_verified', true),
+            'email',
+            timezone('utc', now()),
+            timezone('utc', now()),
+            timezone('utc', now())
+          )
+      ) as seeded(
+        id,
+        user_id,
+        identity_data,
+        provider,
+        created_at,
+        updated_at,
+        last_sign_in_at
+      )
+      where not exists (
+        select 1
+        from auth.identities existing
+        where existing.user_id = seeded.user_id
+          and existing.provider = seeded.provider
+      );
+    else
+      insert into auth.identities (
+        id,
+        user_id,
+        identity_data,
+        provider,
+        created_at,
+        updated_at,
+        last_sign_in_at
+      )
+      select
+        seeded.id::text,
+        seeded.user_id,
+        seeded.identity_data,
+        seeded.provider,
+        seeded.created_at,
+        seeded.updated_at,
+        seeded.last_sign_in_at
+      from (
+        values
+          (
+            donor_user_id,
+            donor_user_id,
+            jsonb_build_object('sub', donor_user_id::text, 'email', 'donor@iva.app', 'email_verified', true),
+            'email',
+            timezone('utc', now()),
+            timezone('utc', now()),
+            timezone('utc', now())
+          ),
+          (
+            ngo_user_id,
+            ngo_user_id,
+            jsonb_build_object('sub', ngo_user_id::text, 'email', 'ngo@iva.app', 'email_verified', true),
+            'email',
+            timezone('utc', now()),
+            timezone('utc', now()),
+            timezone('utc', now())
+          ),
+          (
+            admin_user_id,
+            admin_user_id,
+            jsonb_build_object('sub', admin_user_id::text, 'email', 'admin@iva.app', 'email_verified', true),
+            'email',
+            timezone('utc', now()),
+            timezone('utc', now()),
+            timezone('utc', now())
+          )
+      ) as seeded(
+        id,
+        user_id,
+        identity_data,
+        provider,
+        created_at,
+        updated_at,
+        last_sign_in_at
+      )
+      where not exists (
+        select 1
+        from auth.identities existing
+        where existing.user_id = seeded.user_id
+          and existing.provider = seeded.provider
+      );
+    end if;
+  end if;
+
+  perform public.sync_profile_from_auth_user(donor_user_id);
+  perform public.sync_profile_from_auth_user(ngo_user_id);
+  perform public.sync_profile_from_auth_user(admin_user_id);
 
   update public.profiles
   set
+    role = case id
+      when donor_user_id then 'donor'::public.app_role
+      when ngo_user_id then 'ngo'::public.app_role
+      when admin_user_id then 'admin'::public.app_role
+      else role
+    end,
+    full_name = case id
+      when donor_user_id then coalesce(full_name, 'Asha Mehta')
+      when ngo_user_id then coalesce(full_name, 'Rohan Patil')
+      when admin_user_id then coalesce(full_name, 'IVA Ops')
+      else full_name
+    end,
+    phone = case id
+      when donor_user_id then '+91 90000 11111'
+      when ngo_user_id then '+91 98765 43210'
+      when admin_user_id then '+91 90000 33333'
+      else phone
+    end,
     city = 'Mumbai',
     pincode = case id
       when donor_user_id then '400016'
@@ -133,6 +416,25 @@ begin
       when admin_user_id then '400001'
       else pincode
     end
+  where id in (donor_user_id, ngo_user_id, admin_user_id);
+
+  update auth.users
+  set raw_user_meta_data = coalesce(raw_user_meta_data, '{}'::jsonb) || jsonb_build_object(
+    'full_name',
+    case id
+      when donor_user_id then 'Asha Mehta'
+      when ngo_user_id then 'Rohan Patil'
+      when admin_user_id then 'IVA Ops'
+      else null
+    end,
+    'role',
+    case id
+      when donor_user_id then 'donor'
+      when ngo_user_id then 'ngo'
+      when admin_user_id then 'admin'
+      else null
+    end
+  );
   where id in (donor_user_id, ngo_user_id, admin_user_id);
 
   insert into public.ngos (
@@ -145,6 +447,8 @@ begin
     registration_number,
     contact_phone,
     service_radius_km,
+    accepted_categories,
+    daily_pickup_capacity,
     verified_status,
     latitude,
     longitude
@@ -160,6 +464,8 @@ begin
       'MH-TRUST-48211',
       '+91 98765 43210',
       8,
+      array['Blankets', 'Books', 'Clothes'],
+      14,
       'verified',
       19.0551,
       72.8286
@@ -174,6 +480,8 @@ begin
       'MH-SOC-48351',
       '+91 99887 66554',
       10,
+      array['Packed Meals', 'Dry Rations'],
+      20,
       'pending',
       19.0076,
       72.8429
@@ -340,5 +648,44 @@ begin
       'The volunteer arrived on time and coordinated clearly.'
     )
   on conflict (listing_id, author_id, target_role) do nothing;
+
+  insert into public.chat_messages (
+    id,
+    listing_id,
+    claim_id,
+    sender_id,
+    sender_role,
+    message,
+    shared_phone
+  )
+  values
+    (
+      locked_chat_message_1_id,
+      locked_listing_id,
+      locked_claim_id,
+      ngo_user_id,
+      'ngo',
+      'Hi, we have locked this pickup. Our volunteer can arrive within your selected window.',
+      '+91 98765 43210'
+    ),
+    (
+      locked_chat_message_2_id,
+      locked_listing_id,
+      locked_claim_id,
+      donor_user_id,
+      'donor',
+      'Perfect, the bags are packed near the entrance. Please call if you need the exact building gate.',
+      '+91 90000 11111'
+    ),
+    (
+      completed_chat_message_1_id,
+      completed_listing_id,
+      completed_claim_id,
+      donor_user_id,
+      'donor',
+      'Thanks again for the smooth pickup yesterday.',
+      null
+    )
+  on conflict (id) do nothing;
 end
 $$;

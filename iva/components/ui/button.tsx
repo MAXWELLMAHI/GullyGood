@@ -3,18 +3,21 @@ import { cn } from "@/lib/utils";
 
 const variants = {
   primary:
-    "bg-brand text-brand-foreground shadow-[0_16px_40px_rgba(20,59,42,0.12)] hover:-translate-y-0.5 hover:bg-[#184934]",
+    "bg-[#22C55E] text-white shadow-[0_10px_24px_rgba(34,197,94,0.32)] hover:bg-[#17A34A] hover:shadow-[0_12px_28px_rgba(34,197,94,0.4)]",
   secondary:
-    "bg-accent text-accent-foreground shadow-[0_16px_40px_rgba(234,140,67,0.18)] hover:-translate-y-0.5 hover:bg-[#dd7e36]",
+    "bg-[#FFC800] text-[#14251C] shadow-[0_10px_24px_rgba(255,200,0,0.25)] hover:bg-[#E6B400]",
+  dark:
+    "bg-[#14251C] text-white shadow-[0_10px_24px_rgba(20,37,28,0.25)] hover:bg-[#1B3226]",
   outline:
-    "border border-border bg-card/70 text-foreground hover:border-brand/40 hover:bg-muted-surface/60",
-  ghost: "bg-transparent text-foreground hover:bg-muted-surface/70",
+    "border-2 border-[#E5E7EB] bg-white text-[#14251C] hover:border-[#22C55E] hover:bg-[#F1FCF5]",
+  ghost:
+    "bg-transparent text-[#14251C] hover:bg-[#F3F4F6]",
 } as const;
 
 const sizes = {
-  sm: "h-10 rounded-full px-4 text-sm",
-  md: "h-11 rounded-full px-5 text-sm font-medium",
-  lg: "h-12 rounded-full px-6 text-base font-semibold",
+  sm: "h-9 rounded-full px-4 text-xs font-semibold",
+  md: "h-11 rounded-full px-5 text-sm font-semibold",
+  lg: "h-13 rounded-full px-7 text-base font-bold",
 } as const;
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -32,7 +35,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 whitespace-nowrap transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--ring)] disabled:pointer-events-none disabled:opacity-60",
+        "inline-flex items-center justify-center gap-2 whitespace-nowrap transition-all duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#22C55E]/30 disabled:pointer-events-none disabled:opacity-50 cursor-pointer font-sans",
         variants[variant],
         sizes[size],
         className,
@@ -42,3 +45,4 @@ export function Button({
     />
   );
 }
+

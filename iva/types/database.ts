@@ -81,6 +81,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      chat_messages: {
+        Row: {
+          id: string;
+          listing_id: string;
+          claim_id: string;
+          sender_id: string;
+          sender_role: Database["public"]["Enums"]["app_role"];
+          message: string;
+          shared_phone: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          listing_id: string;
+          claim_id: string;
+          sender_id: string;
+          sender_role: Database["public"]["Enums"]["app_role"];
+          message: string;
+          shared_phone?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          listing_id?: string;
+          claim_id?: string;
+          sender_id?: string;
+          sender_role?: Database["public"]["Enums"]["app_role"];
+          message?: string;
+          shared_phone?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       donation_images: {
         Row: {
           id: string;
@@ -248,6 +281,11 @@ export type Database = {
           registration_number: string | null;
           contact_phone: string | null;
           service_radius_km: number;
+          accepted_categories: string[];
+          operating_hours: Json;
+          daily_pickup_capacity: number;
+          rating_average: number;
+          completion_rate: number;
           verified_status: Database["public"]["Enums"]["ngo_verification_status"];
           latitude: number | null;
           longitude: number | null;
@@ -264,6 +302,11 @@ export type Database = {
           registration_number?: string | null;
           contact_phone?: string | null;
           service_radius_km?: number;
+          accepted_categories?: string[];
+          operating_hours?: Json;
+          daily_pickup_capacity?: number;
+          rating_average?: number;
+          completion_rate?: number;
           verified_status?: Database["public"]["Enums"]["ngo_verification_status"];
           latitude?: number | null;
           longitude?: number | null;
@@ -280,6 +323,11 @@ export type Database = {
           registration_number?: string | null;
           contact_phone?: string | null;
           service_radius_km?: number;
+          accepted_categories?: string[];
+          operating_hours?: Json;
+          daily_pickup_capacity?: number;
+          rating_average?: number;
+          completion_rate?: number;
           verified_status?: Database["public"]["Enums"]["ngo_verification_status"];
           latitude?: number | null;
           longitude?: number | null;
@@ -293,9 +341,14 @@ export type Database = {
           id: string;
           user_id: string;
           kind: string;
+          channel: string;
+          delivery_status: string;
           title: string;
           body: string;
           href: string | null;
+          metadata: Json;
+          deliver_at: string;
+          sent_at: string | null;
           read_at: string | null;
           created_at: string;
         };
@@ -303,9 +356,14 @@ export type Database = {
           id?: string;
           user_id: string;
           kind: string;
+          channel?: string;
+          delivery_status?: string;
           title: string;
           body: string;
           href?: string | null;
+          metadata?: Json;
+          deliver_at?: string;
+          sent_at?: string | null;
           read_at?: string | null;
           created_at?: string;
         };
@@ -313,9 +371,14 @@ export type Database = {
           id?: string;
           user_id?: string;
           kind?: string;
+          channel?: string;
+          delivery_status?: string;
           title?: string;
           body?: string;
           href?: string | null;
+          metadata?: Json;
+          deliver_at?: string;
+          sent_at?: string | null;
           read_at?: string | null;
           created_at?: string;
         };
@@ -419,11 +482,25 @@ export type Database = {
           pickup_window_start: string;
           pickup_window_end: string;
           distance_km: number | null;
+          match_score: number | null;
+          ngo_rating_average: number | null;
+          ngo_completion_rate: number | null;
+          donor_full_name: string | null;
+          donor_phone: string | null;
           address_visible: boolean;
           current_claim_id: string | null;
           current_claim_state: Database["public"]["Enums"]["claim_status"] | null;
           current_ngo_name: string | null;
         }[];
+      };
+      log_audit_event: {
+        Args: {
+          event_action: string;
+          event_entity_type: string;
+          event_entity_id: string;
+          event_metadata?: Json;
+        };
+        Returns: string;
       };
       lock_listing: {
         Args: {
@@ -448,8 +525,38 @@ export type Database = {
           pickup_window_start: string;
           pickup_window_end: string;
           distance_km: number;
+          match_score: number;
+          ngo_rating_average: number;
+          ngo_completion_rate: number;
           status: Database["public"]["Enums"]["donation_status"];
         }[];
+      };
+      queue_notification: {
+        Args: {
+          target_user_id: string;
+          notification_kind: string;
+          notification_title: string;
+          notification_body: string;
+          notification_href?: string | null;
+          notification_channel?: string;
+          notification_metadata?: Json;
+          scheduled_for?: string;
+        };
+        Returns: string;
+      };
+      send_chat_message: {
+        Args: {
+          listing_uuid: string;
+          message_body: string;
+          share_phone?: boolean;
+        };
+        Returns: string;
+      };
+      sync_profile_from_auth_user: {
+        Args: {
+          target_user_id?: string | null;
+        };
+        Returns: Database["public"]["Enums"]["app_role"] | null;
       };
     };
     Enums: {

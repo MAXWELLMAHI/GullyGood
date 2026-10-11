@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Building2, Layers, ShieldCheck, Users } from "lucide-react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { DonationCard } from "@/components/donation/donation-card";
 import { Card } from "@/components/ui/card";
@@ -15,51 +16,72 @@ export default async function AdminDashboardPage() {
         <>
           <Link
             href="/admin/ngos"
-            className="rounded-full bg-brand px-5 py-3 text-sm font-semibold text-brand-foreground transition hover:bg-[#184934]"
+            className="rounded-full bg-[#22C55E] px-5 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#17A34A]"
           >
             Manage NGOs
           </Link>
           <Link
             href="/admin/listings"
-            className="rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition hover:border-brand/40 hover:bg-white"
+            className="rounded-full border border-[#E5E7EB] bg-white px-5 py-2.5 text-xs font-bold text-[#14251C] shadow-xs transition hover:bg-[#F1FCF5]"
           >
-            View listings
+            All listings
           </Link>
         </>
       }
-      description="Monitor onboarding, user growth, and donation flow health from a single admin workspace."
-      eyebrow="Admin dashboard"
+      description="Monitor NGO verifications, platform supply health, and donation lifecycle trust from a centralized control room."
+      eyebrow="Admin Operations"
       previewMode={auth.previewMode}
-      title="Keep trust, operations, and compliance moving together."
+      title="Platform Operations & Compliance"
     >
-      <section className="grid gap-4 md:grid-cols-3">
-        {data.stats.map((stat) => (
-          <Card key={stat.label} className="glass-panel p-6">
-            <p className="text-sm font-medium text-muted">{stat.label}</p>
-            <p className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
-              {stat.value}
-            </p>
-            <p className="mt-3 text-sm leading-6 text-muted">{stat.hint}</p>
-          </Card>
-        ))}
-      </section>
+      <div className="space-y-8">
+        {/* Stat Numbers */}
+        <section className="grid gap-4 md:grid-cols-3">
+          {data.stats.map((stat, idx) => (
+            <div key={stat.label} className="rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">{stat.label}</p>
+                <span className="text-lg">
+                  {idx === 0 ? "👥" : idx === 1 ? "🏢" : "📦"}
+                </span>
+              </div>
+              <p className="mt-2 font-display text-3xl font-bold tracking-tight text-[#14251C]">
+                {stat.value}
+              </p>
+              <p className="mt-1 text-xs text-[#6B7280]">{stat.hint}</p>
+            </div>
+          ))}
+        </section>
 
-      <section className="page-grid">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-semibold text-foreground">Recent listings</h2>
-          <p className="text-sm leading-6 text-muted">
-            Admins can review claims, user activity, and complaint-prone donations here.
-          </p>
-        </div>
-        {data.listings.slice(0, 3).map((listing) => (
-          <DonationCard
-            key={listing.id}
-            ctaLabel="Inspect listing"
-            href="/admin/listings"
-            listing={listing}
-          />
-        ))}
-      </section>
+        {/* Recent Listings */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h2 className="font-display text-2xl font-bold text-[#14251C]">Recent marketplace activity</h2>
+              <p className="text-sm text-[#6B7280]">
+                Monitor live locks, active pickups, and verified handoffs.
+              </p>
+            </div>
+            <Link
+              href="/admin/listings"
+              className="text-xs font-bold text-[#17A34A] hover:underline"
+            >
+              View all listings →
+            </Link>
+          </div>
+
+          <div className="grid gap-4">
+            {data.listings.slice(0, 3).map((listing) => (
+              <DonationCard
+                key={listing.id}
+                ctaLabel="Inspect listing"
+                href={`/donor/listings/${listing.id}`}
+                listing={listing}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
     </DashboardShell>
   );
 }
+

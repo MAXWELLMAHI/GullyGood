@@ -1,5 +1,6 @@
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { DonationCard } from "@/components/donation/donation-card";
+import { NgoLiveActivity } from "@/components/ngo/ngo-live-activity";
 import { Card } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
 import { getNgoDashboardData } from "@/lib/data";
@@ -10,57 +11,79 @@ export default async function NgoDashboardPage() {
 
   return (
     <DashboardShell
-      description="See nearby live listings, lock one donation at a time, and move pickups through completion."
-      eyebrow="NGO dashboard"
+      description="See nearby live listings in Mumbai, lock one donation at a time, and move pickups through completion."
+      eyebrow="NGO Workspace"
       previewMode={auth.previewMode}
       title="Prioritize the closest, most pickup-ready donations."
     >
-      <section className="grid gap-4 md:grid-cols-3">
-        {data.stats.map((stat) => (
-          <Card key={stat.label} className="glass-panel p-6">
-            <p className="text-sm font-medium text-muted">{stat.label}</p>
-            <p className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
-              {stat.value}
+      <div className="space-y-8">
+        {/* Live Radar Beacon Component */}
+        <NgoLiveActivity
+          previewMode={auth.previewMode}
+          initialListingIds={data.nearbyListings.map((l) => l.id)}
+        />
+
+        {/* Stat Cards */}
+        <section className="grid gap-4 md:grid-cols-3">
+          {data.stats.map((stat) => (
+            <div key={stat.label} className="rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-xs">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">{stat.label}</p>
+              <p className="mt-2 font-display text-3xl font-bold tracking-tight text-[#14251C]">
+                {stat.value}
+              </p>
+              <p className="mt-1 text-xs text-[#6B7280]">{stat.hint}</p>
+            </div>
+          ))}
+        </section>
+
+        {/* Nearby Live Listings */}
+        <section className="space-y-4">
+          <div className="space-y-1">
+            <h2 className="font-display text-2xl font-bold text-[#14251C]">Nearby live listings</h2>
+            <p className="text-sm text-[#6B7280]">
+              Exact donor addresses stay protected until your NGO locks a listing.
             </p>
-            <p className="mt-3 text-sm leading-6 text-muted">{stat.hint}</p>
-          </Card>
-        ))}
-      </section>
+          </div>
+          <div className="grid gap-4">
+            {data.nearbyListings.length > 0 ? (
+              data.nearbyListings.map((listing) => (
+                <DonationCard
+                  key={listing.id}
+                  ctaLabel="Review and lock"
+                  href={`/ngo/listings/${listing.id}`}
+                  listing={listing}
+                  showDistance
+                />
+              ))
+            ) : (
+              <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-white p-8 text-center text-sm text-[#6B7280]">
+                No new listings in your radius right now. The live radar above will ping as soon as a donor posts!
+              </div>
+            )}
+          </div>
+        </section>
 
-      <section className="page-grid">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-semibold text-foreground">Nearby live listings</h2>
-          <p className="text-sm leading-6 text-muted">
-            Exact donor addresses stay hidden until your NGO locks a listing.
-          </p>
-        </div>
-        {data.nearbyListings.map((listing) => (
-          <DonationCard
-            key={listing.id}
-            ctaLabel="Review and lock"
-            href={`/ngo/listings/${listing.id}`}
-            listing={listing}
-            showDistance
-          />
-        ))}
-      </section>
-
-      <section className="page-grid">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-semibold text-foreground">Active claims</h2>
-          <p className="text-sm leading-6 text-muted">
-            Use this section to complete pickups and gather donor feedback.
-          </p>
-        </div>
-        {data.activeClaims.map((listing) => (
-          <DonationCard
-            key={listing.id}
-            ctaLabel="Open claim"
-            href={`/ngo/listings/${listing.id}`}
-            listing={listing}
-          />
-        ))}
-      </section>
+        {/* Active Claims */}
+        <section className="space-y-4">
+          <div className="space-y-1">
+            <h2 className="font-display text-2xl font-bold text-[#14251C]">Active claims in progress</h2>
+            <p className="text-sm text-[#6B7280]">
+              Coordinate with donors, dispatch volunteers, and mark pickups completed.
+            </p>
+          </div>
+          <div className="grid gap-4">
+            {data.activeClaims.map((listing) => (
+              <DonationCard
+                key={listing.id}
+                ctaLabel="Open claim & chat"
+                href={`/ngo/listings/${listing.id}`}
+                listing={listing}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
     </DashboardShell>
   );
 }
+
