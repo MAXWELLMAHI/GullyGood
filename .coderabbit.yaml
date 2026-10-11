@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-US"
+
+# Configuration for AI Code Reviews
+reviews:
+  profile: "assertive" # In-depth analysis and comprehensive feedback
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  sequence_diagrams: true
+  auto_review:
+    enabled: true
+    drafts: true # Review drafts as well
+    base_branches:
+      - "main"
+      - "master"
+
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/.next/**"
+    - "!**/dist/**"
+    - "!**/out/**"
+    - "!**/*.lock"
+
+  path_instructions:
+    - path: "iva/app/**"
+      instructions: "Check Next.js 15 App Router conventions, server/client component boundaries, error handling, accessibility, and responsive UI."
+    - path: "iva/database/**"
+      instructions: "Ensure Row Level Security (RLS) policies are robust, no SQL injection risks, and schema integrity is maintained."
+    - path: "iva/lib/**"
+      instructions: "Verify Supabase client/server session handling, authentication flow correctness, and edge runtime compatibility."
+
+# Chat and Interactive AI Features
+chat:
+  auto_reply: true
+
+# Knowledge Base & Guidelines
+knowledge_base:
+  web_search:
+    enabled: true
+  code_guidelines:
+    enabled: true
